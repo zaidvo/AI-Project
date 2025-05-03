@@ -1,124 +1,118 @@
-# 7x7 Tic Tac Toe with Deep Q-Learning
+# AlphaZero for 5x5 TicTacToe (4-in-a-row)
 
-This project implements a 7x7 Tic Tac Toe game with an AI agent trained using Deep Q-Network (DQN) reinforcement learning. The goal is to get 4 in a row (horizontally, vertically, or diagonally).
+This project implements the AlphaZero algorithm for a 5x5 TicTacToe game where connecting 4 stones in a row (horizontally, vertically, or diagonally) wins the game.
 
-## Files
+## Features
 
-- `tictactoe_env.py`: Game environment for 7x7 Tic Tac Toe
-- `dqn_model.py`: DQN neural network model
-- `dqn_agent.py`: DQN agent with experience replay and target network
-- `train.py`: Script for training the agent
-- `play.py`: Script for playing against the trained agent
-- `test.py`: Script for evaluating the agent's performance
+- Optimized for 5x5 board with 4-in-a-row win condition
+- Monte Carlo Tree Search (MCTS) with neural network guidance
+- Self-play training pipeline
+- Deep residual neural network architecture
+- Play against trained agent
+- Tournament system to compare different checkpoints
+
+## Project Structure
+
+- `env.py`: TicTacToe environment with customizable board size and win condition
+- `model.py`: Neural network architecture for policy and value prediction
+- `mcts.py`: Monte Carlo Tree Search implementation
+- `agent.py`: AlphaZero agent with self-play and training capabilities
+- `train.py`: Training script to run the AlphaZero training loop
+- `play.py`: Play against the trained agent
+- `tournament.py`: Run tournaments between different model checkpoints
 
 ## Requirements
 
-- Python 3.6+
+- Python 3.7+
 - PyTorch
 - NumPy
-- Matplotlib
 - tqdm
 
-Install the requirements:
+## Installation
 
 ```bash
-pip install torch numpy matplotlib tqdm
+# Clone the repository
+git clone https://github.com/yourusername/alphazero-tictactoe.git
+cd alphazero-tictactoe
+
+# Install dependencies
+pip install torch numpy tqdm
 ```
 
-## Training the Agent
+## Training
 
-To train the agent against a random opponent:
+To train the agent from scratch:
 
 ```bash
-python train.py --episodes 10000 --save_interval 1000
+python train.py --board_size 5 --win_length 4 --iterations 50 --games 100
 ```
 
-To train the agent using self-play (recommended for better performance):
+Parameters:
 
-```bash
-python train.py --episodes 10000 --self_play --save_interval 1000
-```
-
-Additional training options:
-
-```bash
-python train.py --help
-```
-
-The training script will save model checkpoints at regular intervals and plot the training rewards.
+- `--board_size`: Size of the board (default: 5)
+- `--win_length`: Number of stones in a row needed to win (default: 4)
+- `--iterations`: Number of training iterations (default: 50)
+- `--games`: Self-play games per iteration (default: 50)
+- `--simulations`: MCTS simulations per move (default: 800)
+- `--epochs`: Training epochs per iteration (default: 10)
+- `--checkpoint_interval`: Save checkpoint every N iterations (default: 1)
+- `--no_resume`: Don't resume from existing checkpoint
+- `--evaluate_every`: Evaluate against random player every N iterations (default: 5)
+- `--eval_games`: Number of evaluation games (default: 20)
 
 ## Playing Against the Agent
 
-To play against the trained agent:
+To play against a trained agent:
 
 ```bash
-python play.py --model_path model_final.pt
+python play.py --checkpoint checkpoints_5x5_4in/alphazero_tictactoe_5x5_4in_best.pt --player 1
 ```
 
-By default, you play as O (second player). To play as X (first player):
+Parameters:
+
+- `--board_size`: Size of the board (default: 5)
+- `--win_length`: Number of stones in a row needed to win (default: 4)
+- `--checkpoint_dir`: Directory with checkpoints (default: ./checkpoints)
+- `--checkpoint`: Specific checkpoint to load (default: most recent)
+- `--player`: Human player: 1=X (first), -1=O (second) (default: 1)
+- `--simulations`: Number of MCTS simulations per move (default: 800)
+
+## Running Tournaments
+
+To compare different checkpoints in a tournament:
 
 ```bash
-python play.py --model_path model_final.pt --human_player 1
+python tournament.py --checkpoints_dir checkpoints_5x5_4in --games 10
 ```
 
-## Testing the Agent
+Parameters:
 
-To evaluate the agent's performance against a random opponent:
+- `--checkpoints_dir`: Directory containing checkpoints (required)
+- `--board_size`: Size of the board (default: 5)
+- `--win_length`: Win condition length (default: 4)
+- `--simulations`: MCTS simulations per move (default: 800)
+- `--games`: Games per match (default: 10)
 
-```bash
-python test.py --model_path model_final.pt --games 1000
-```
+## Optimizations
 
-To evaluate the agent in self-play:
+Several optimizations have been implemented for the 5x5 game with 4-in-a-row win condition:
 
-```bash
-python test.py --model_path model_final.pt --games 1000 --opponent self
-```
-
-To display games during testing (this slows down testing significantly):
-
-```bash
-python test.py --model_path model_final.pt --games 10 --render --verbose
-```
-
-## Implementation Details
-
-### Game Environment
-
-- 7x7 grid
-- Goal: Get 4 in a row (horizontally, vertically, or diagonally)
-- X plays first, O plays second
-- State representation: 7x7 numpy array with:
-  - 1 for X
-  - -1 for O
-  - 0 for empty
-
-### DQN Model
-
-- Input: Two 7x7 channels (one for X positions, one for O positions)
-- Architecture:
-  - 3 convolutional layers
-  - 3 fully connected layers
-  - Output: Q-values for all 49 possible actions
-
-### Agent Features
-
-- Experience replay memory
-- Target network for stable learning
-- Epsilon-greedy exploration strategy
-- Self-play training option
+- Tuned neural network depth and width
+- Improved MCTS exploration parameters
+- Dirichlet noise for exploration diversity
+- Learning rate scheduling
+- Efficient win checking algorithm
+- KL divergence loss for policy training
 
 ## Performance
 
-After training with self-play for 10,000 episodes, the agent typically achieves:
+The trained agent can:
 
-- ~85-95% win rate against a random opponent when playing as X
-- ~75-85% win rate against a random opponent when playing as O
-- Near-optimal play in self-play scenarios (most games end in draws)
+- Learn effective strategies for 5x5 TicTacToe
+- Block opponent's threats
+- Create strategic patterns to form winning moves
+- Evaluate board positions accurately
 
-## Future Improvements
+## Acknowledgements
 
-- Implement Monte Carlo Tree Search (MCTS) for stronger opponent
-- Add minimax-based agent for comparison
-- Implement prioritized experience replay
-- Create a web interface for human play
+This implementation is inspired by the AlphaZero algorithm described in the paper "Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm" by Silver et al.

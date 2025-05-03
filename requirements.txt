@@ -1,4 +1,7 @@
-torch>=1.9.0
-numpy>=1.19.5
-matplotlib>=3.3.4
-tqdm>=4.61.0
+# Visualization
+tqdm
+matplotlib
+
+# Agent
+numpy
+torch
