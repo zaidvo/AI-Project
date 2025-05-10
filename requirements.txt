@@ -1,7 +1,1 @@
-# Visualization
-tqdm
-matplotlib
-
-# Agent
-numpy
-torch
+pygame

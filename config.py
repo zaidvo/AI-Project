@@ -1,0 +1,13 @@
+CELL_SIZE = 100
+LINE_WIDTH = 5
+
+WHITE = (255, 255, 255)
+BLACK = (10, 10, 10)
+GRAY = (200, 200, 200)
+RED = (255, 0, 0)
+
+EMPTY = ""
+PLAYER_X = "X"
+PLAYER_O = "O"
+
+WIN_LENGTH = 4
