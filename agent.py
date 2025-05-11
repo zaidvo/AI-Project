@@ -1,3 +1,4 @@
+import random
 from config import *
 
 # Scoring constants
@@ -8,19 +9,34 @@ ONE_IN_ROW_SCORE = 1
 BLOCK_WEIGHT = 1.2
 
 
+BOARD_SIZE = 5
+ZOBRIST_TABLE = {
+    "X": [
+        [random.getrandbits(64) for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)
+    ],
+    "O": [
+        [random.getrandbits(64) for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)
+    ],
+}
+
+
 class MinimaxAgent:
     def __init__(self, player, opponent, depth=4):
         self.player = player
         self.opponent = opponent
         self.depth = depth
         self.cache = {}
+        self.states_explored = 0
 
     def choose_move(self, game):
-        self.cache.clear()  # Clear cache per move to limit memory use
+        self.cache.clear()
+        self.states_explored = 0
         _, move = self.minimax(game, self.depth, float("-inf"), float("inf"), True)
+        print(f"States explored: {self.states_explored}")
         return move
 
     def minimax(self, game, depth, alpha, beta, maximizing):
+        self.states_explored += 1
         board_key = self._board_hash(game)
 
         if board_key in self.cache:
@@ -95,18 +111,38 @@ class MinimaxAgent:
         return total
 
     def _board_hash(self, game):
-        # Immutable and hashable board representation
-        return tuple(tuple(row) for row in game.board)
+        h = 0
+        for r in range(BOARD_SIZE):
+            for c in range(BOARD_SIZE):
+                piece = game.board[r][c]
+                if piece == self.player:
+                    h ^= ZOBRIST_TABLE[self.player][r][c]
+                elif piece == self.opponent:
+                    h ^= ZOBRIST_TABLE[self.opponent][r][c]
+        return h
+
+    def _is_near_existing_piece(self, game, row, col, distance=1):
+        for dr in range(-distance, distance + 1):
+            for dc in range(-distance, distance + 1):
+                r, c = row + dr, col + dc
+                if 0 <= r < BOARD_SIZE and 0 <= c < BOARD_SIZE:
+                    if game.board[r][c] != EMPTY:
+                        return True
+        return False
 
     def _order_moves(self, game, moves, maximizing):
-        # Score moves using shallow evaluation (heuristic only)
-        move_scores = []
+        center = BOARD_SIZE // 2
+        scored = []
+
         for move in moves:
+            r, c = move
+            near = self._is_near_existing_piece(game, r, c)
+            center_dist = abs(center - r) + abs(center - c)
             game.make_move(move, self.player if maximizing else self.opponent)
             score = self.evaluate(game)
-            move_scores.append((score, move))
             game.undo_move(move)
+            priority = (near, -center_dist, score if maximizing else -score)
+            scored.append((priority, move))
 
-        # Sort descending for maximizing, ascending for minimizing
-        move_scores.sort(reverse=maximizing)
-        return [move for _, move in move_scores]
+        scored.sort(reverse=True)
+        return [move for _, move in scored]
