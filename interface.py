@@ -316,7 +316,7 @@ class GameBoard:
 
 
 class GameUI:
-    def __init__(self, screen_width, screen_height, grid_size=3):
+    def __init__(self, screen_width, screen_height, grid_size=5):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.grid_size = grid_size
@@ -534,7 +534,7 @@ def main():
     game_state = "main_menu"
     
     # Game settings
-    grid_size = 3
+    grid_size = 5  # Fixed to 5x5
     ai_depth = 3
     game_mode = "Human vs Human"
     player_first = True
@@ -602,53 +602,30 @@ def main():
                 
         elif game_state == "depth_select":
             menu.setup("Select AI Difficulty", [
-                ("easy", "Easy (Depth 2)"),
                 ("medium", "Medium (Depth 3)"),
                 ("hard", "Hard (Depth 4)"),
                 ("very_hard", "Very Hard (Depth 5)"),
+                ("extreme", "Extreme (Depth 6)"),
                 ("back", "Back")
             ])
             
             choice = menu.handle_events()
             menu.draw(screen)
             
-            if choice == "easy":
-                ai_depth = 2
-                game_state = "grid_select"
-            elif choice == "medium":
+            if choice == "medium":
                 ai_depth = 3
-                game_state = "grid_select"
+                game_state = "start_game"
             elif choice == "hard":
                 ai_depth = 4
-                game_state = "grid_select"
+                game_state = "start_game"
             elif choice == "very_hard":
                 ai_depth = 5
-                game_state = "grid_select"
+                game_state = "start_game"
+            elif choice == "extreme":
+                ai_depth = 6
+                game_state = "start_game"
             elif choice == "back":
                 game_state = "turn_select" if game_mode == "Human vs AI" else "mode_select"
-        
-        elif game_state == "grid_select":
-            menu.setup("Select Grid Size", [
-                ("3x3", "3×3 (Classic)"),
-                ("4x4", "4×4"),
-                ("5x5", "5×5"),
-                ("back", "Back")
-            ])
-            
-            choice = menu.handle_events()
-            menu.draw(screen)
-            
-            if choice == "3x3":
-                grid_size = 3
-                game_state = "start_game"
-            elif choice == "4x4":
-                grid_size = 4
-                game_state = "start_game"
-            elif choice == "5x5":
-                grid_size = 5
-                game_state = "start_game"
-            elif choice == "back":
-                game_state = "depth_select"
         
         elif game_state == "settings":
             menu.setup("Settings", [
@@ -662,7 +639,7 @@ def main():
                 game_state = "main_menu"
         
         elif game_state == "start_game":
-            # Calculate appropriate screen size based on grid size
+            # Calculate appropriate screen size based on grid size (always 5x5)
             cell_size = 120  # Base cell size
             screen_width = max(700, grid_size * cell_size + 100)
             screen_height = max(800, grid_size * cell_size + 240)
